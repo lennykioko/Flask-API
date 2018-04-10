@@ -1,9 +1,10 @@
 import datetime
 
+# itsdangerous handles all of the token work i.e json web tokens
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer,
                           BadSignature, SignatureExpired)
 from argon2 import PasswordHasher
-from peewee import *
+from peewee import * #pylint: disable=W0614
 
 import config
 
@@ -18,7 +19,7 @@ class User(Model):
     class Meta:
         database = DATABASE
 
-    @classmethod
+    @classmethod # method belonging in a class and can create an instance of the class it exists in
     def create_user(cls, username, email, password, **kwargs):
         email = email.lower()
         try:
@@ -44,7 +45,7 @@ class User(Model):
             user = User.get(User.id==data['íd'])
             return user
 
-    @staticmethod # method belonging to the class but does not care at all about the class
+    @staticmethod # method belonging to the class but does not care at all about the class, it is just a function that happens to be in this class
     def set_password(password):
         return HASHER.hash(password)
 

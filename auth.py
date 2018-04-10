@@ -2,9 +2,11 @@ from flask import g
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth, MultiAuth
 import models
 
+# itsdangerous handles all of the token work i.e json web tokens
+# httpbasicauth makes it that you do not need javascript for any of this
 basic_auth = HTTPBasicAuth()
 token_auth = HTTPTokenAuth(scheme='Token')
-auth = MultiAuth(token_auth, basic_auth)
+auth = MultiAuth(token_auth, basic_auth) # looks at the first thing first
 
 @basic_auth.verify_password
 def verify_password(email_or_username, password):

@@ -1,5 +1,5 @@
 from flask import jsonify, Blueprint, abort
-
+# reqparse handles the request part of the requst-response cycle by validating the input
 from flask_restful import (Resource, Api, reqparse, inputs, fields,
                                marshal, marshal_with, url_for)
 
@@ -42,9 +42,10 @@ class CourseList(Resource):
 
     def get(self):
         courses = [marshal(add_reviews(course), course_fields)
-            for course in models.Course.select()] #marshal helps get your data in a format that can easily be converted to json
+            for course in models.Course.select()]  # marshal helps get your data in a format that can easily be converted to json and safely sent over the internet
         return {'courses': courses}
 
+    # marshal with is mainly used when you are returning a single item and marshal is used esp with multiple items i.e when iterating
     @marshal_with(course_fields)
     @auth.login_required
     def post(self):
@@ -77,8 +78,9 @@ class Course(Resource):
         args = self.reqparse.parse_args()
         query = models.Course.update(**args).where(models.Course.id==id)
         query.execute()
-        return (add_reviews(models.Course.get(models.Course.id==id)), 200,
-                {'Location': url_for('resources.courses.course', id=id)})
+        return (add_reviews(models.Course.get(models.Course.id==id)), 200, # 200 - OK 204 - Missing/empty body
+                {'Location': url_for('resources.courses.course', id=id)}) # if you do not return a body at least have a location in your header so that users of the API can know where to go to get the updated data
+                # here it is good that we return both the location in the header and the updated content in the body
 
     @auth.login_required
     def delete(self, id):
@@ -87,9 +89,11 @@ class Course(Resource):
         return '', 204, {'Location': url_for('resources.courses.courses')}
 
 # blueprint kinda creates a proxy
-courses_api = Blueprint('resources.courses', __name__) # path/to/file, name
+# it is not an app in intself
+# any action executed on the blueprint will not be put into action until it is registered on an actual running flask app
+courses_api = Blueprint('resources.courses', __name__) # path/to/file, namespace
 
 # create the API
-api = Api(courses_api) # normally tou pass an app but here we pass the blueprint which acts like an app
+api = Api(courses_api) # normally you pass an app but here we pass the blueprint which acts like an app
 api.add_resource(CourseList, '/courses', endpoint='courses')
 api.add_resource(Course, '/courses/<int:id>', endpoint='course')

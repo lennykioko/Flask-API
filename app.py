@@ -1,3 +1,8 @@
+"""our API is a web service that provides data for other web, mobile or desktop application
+in a safe and secure manner. Other programmers need not scrape our website for data and have to modify
+their scraping tools whenever we update our site and we need not worry about them scraping
+sensititve data from our website...win win.
+"""
 from flask import Flask, g, jsonify
 
 from flask_limiter import Limiter
@@ -18,9 +23,11 @@ app.register_blueprint(reviews_api, url_prefix='/api/v1')
 app.register_blueprint(users_api, url_prefix='/api/v1')
 
 
-limiter = Limiter(app, default_limits=[config.DEFAULT_RATE], key_func=get_ipaddr)
-limiter.limit("40/day")(users_api)
-limiter.limit(config.DEFAULT_RATE, per_method=True, methods=['POST', 'PUT', 'DELETE'])(courses_api)
+limiter = Limiter(app, default_limits=[config.DEFAULT_RATE], key_func=get_ipaddr) # sets the limit and uses ip address to identifyy a user
+limiter.limit("40/day")(users_api) # add an additional limit to a resource
+# per_method makes it sensitive to the method involved
+# we make an exception to limiting GET requests but limit the other methods
+limiter.limit(config.DEFAULT_RATE, per_method=True, methods=['POST', 'PUT', 'DELETE'])(courses_api) 
 limiter.limit(config.DEFAULT_RATE, per_method=True, methods=['POST', 'PUT', 'DELETE'])(reviews_api)
 # limiter.exempt(courses_api)
 # limiter.exempt(reviews_api)
